@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FINDEUBUG</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0e17;
+    --panel: #151e2d;
+    --border: #25324a;
+    --blue: #418df7;
+    --blue-soft: #6ea8fe;
+    --muted: #8493ab;
+    --text: #d4dcea;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  section { scroll-margin-top: 4.5rem; }
+  @media (min-width: 992px) { section { scroll-margin-top: 1.5rem; } }
+
+  @media (max-width: 991.98px) {
+    .sidebar {
+      padding: .5rem 1rem;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,.45);
+    }
+    .sidebar .dots { display: inline-block !important; margin: 0 .6rem 0 0 !important; }
+    .sidebar .navbar-collapse { padding-top: .5rem; }
+  }
+  .text-blue  { color: var(--blue) !important; }
+  .text-muted2 { color: var(--muted) !important; }
+
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+  }
+  @media (min-width: 992px) {
+    .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 240px; align-items: flex-start; padding: 1.5rem 1rem; }
+    .sidebar .navbar-collapse { width: 100%; align-items: flex-start; }
+    main { margin-left: 240px; }
+  }
+  .dots span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+  .dots .r { background: #ee5f57; } .dots .y { background: #f0bb3d; } .dots .g { background: #62d67c; }
+  .navbar-brand { color: var(--blue-soft) !important; font-weight: 700; }
+  .sidebar .nav-link {
+    color: var(--blue-soft);
+    border: 1px solid transparent;
+    border-radius: .5rem;
+    padding: .6rem .9rem;
+    margin-bottom: .4rem;
+  }
+  .sidebar .nav-link:hover { border-color: var(--blue); }
+  .sidebar .nav-link.active { background: var(--blue); color: #0a0e17; font-weight: 700; }
+
+  .btn-fb {
+    background: var(--blue); color: #0a0e17; font-weight: 700;
+    border: 1px solid var(--blue); border-radius: .5rem; padding: .8rem 2rem;
+  }
+  .btn-fb:hover { background: #5b9ffa; color: #0a0e17; }
+  .btn-fb-outline {
+    background: transparent; color: var(--blue); font-weight: 500;
+    border: 1px solid var(--blue); border-radius: .5rem; padding: .8rem 2rem;
+  }
+  .btn-fb-outline:hover { background: rgba(65,141,247,.12); color: var(--blue-soft); }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 8vw, 4.5rem);
+    font-weight: 700; letter-spacing: .04em; color: var(--blue);
+  }
+
+  .card-fb { background: var(--panel); border: 1px solid var(--border); border-radius: .75rem; height: 100%; }
+  .card-fb .card-title { color: var(--blue-soft); }
+  .card-fb .card-text { color: var(--muted); font-size: .9rem; }
+
+  #peekCarousel { border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; background: var(--panel); }
+  #peekCarousel img { display: block; width: 100%; height: auto; aspect-ratio: 11 / 9; object-fit: cover; }
+  #peekCarousel .carousel-indicators [data-bs-target] { background-color: var(--blue); }
+
+  .accordion {
+    --bs-accordion-bg: var(--panel);
+    --bs-accordion-color: var(--text);
+    --bs-accordion-border-color: var(--border);
+    --bs-accordion-btn-bg: var(--panel);
+    --bs-accordion-btn-color: var(--blue-soft);
+    --bs-accordion-active-bg: #1a2640;
+    --bs-accordion-active-color: var(--blue);
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 .2rem rgba(65,141,247,.25);
+  }
+  .accordion-button { font-family: inherit; }
+  .accordion-button::after { filter: invert(1) brightness(.8); }
+
+  .form-control {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    font-family: inherit;
+  }
+  .form-control:focus { background: var(--bg); color: var(--text); border-color: var(--blue); box-shadow: 0 0 0 .2rem rgba(65,141,247,.25); }
+  .form-control::placeholder { color: #55637b; }
+  .form-label { color: var(--blue-soft); }
+
+  .modal-content { background: var(--panel); color: var(--text); border: 1px solid var(--blue); font-family: inherit; }
+  .modal-header, .modal-footer { border-color: var(--border); }
+  .check-circle {
+    width: 64px; height: 64px; border-radius: 50%; border: 2px solid #62d67c; color: #62d67c;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 2rem;
+  }
+
+  footer { border-top: 1px solid var(--border); color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+
+<body data-bs-spy="scroll" data-bs-target="#sideNav" data-bs-root-margin="0px 0px -55%" tabindex="0">
+
+<nav class="navbar navbar-expand-lg navbar-dark sidebar sticky-top" id="sideNav">
+  <div class="container-fluid flex-lg-column align-items-lg-start p-0">
+    <div class="d-flex w-100 justify-content-between align-items-center mb-lg-4 px-2 px-lg-0">
+      <a class="navbar-brand" href="#top">
+        <span class="dots d-block mb-2"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        findeubug
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+              aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+    <div class="collapse navbar-collapse w-100 px-2 px-lg-0" id="navMenu">
+      <ul class="navbar-nav nav-pills flex-column w-100">
+        <li class="nav-item"><a class="nav-link" href="#about">about()</a></li>
+        <li class="nav-item"><a class="nav-link" href="#gallery">gallery()</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faq">faq()</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <div class="container-xl px-4 px-lg-5 py-4">
+
+    <header class="hero text-center py-5 my-lg-4">
+      <h1>FINDEUBUG</h1>
+      <p class="text-muted2 mt-2 mb-4">2 player competitive debugging (LAN)</p>
+      <div class="d-flex flex-wrap gap-3 justify-content-center">
+        <a href="#gallery" class="btn btn-fb">PLAY()</a>
+        <a href="#feedback" class="btn btn-fb-outline">SEND_FEEDBACK()</a>
+      </div>
+    </header>
+
+    <section id="about" class="py-5">
+      <h2 class="text-blue mb-1">about_findeubug()</h2>
+      <p class="text-muted2 mb-4">/* what is this thing? */</p>
+      <p class="mb-4">
+        FINDEUBUG is a two-player competitive debugging game played over your local network.
+        Both players get the same broken program, and the first one to find and fix the bug wins the round.
+        Sharpen your code-reading skills while racing a friend on the same Wi-Fi.
+      </p>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card card-fb"><div class="card-body">
+            <h3 class="card-title h6">&gt; join_or_host()</h3>
+            <p class="card-text mb-0">Join an open game, or host a match for two other players on your LAN.</p>
+          </div></div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-fb"><div class="card-body">
+            <h3 class="card-title h6">&gt; race_to_fix()</h3>
+            <p class="card-text mb-0">Same snippet, same bug, same clock. Spot the problem and patch it before your rival.</p>
+          </div></div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-fb"><div class="card-body">
+            <h3 class="card-title h6">&gt; custom_snippets()</h3>
+            <p class="card-text mb-0">Out of the 300 built-in programs? Add your own buggy code and challenge friends.</p>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery" class="py-5">
+      <h2 class="text-blue mb-1">Sneak Peak</h2>
+      <p class="text-muted2 mb-4">/* a look inside the game */</p>
+
+      <div id="peekCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#peekCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#peekCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+          <button type="button" data-bs-target="#peekCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+          <button type="button" data-bs-target="#peekCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+          <button type="button" data-bs-target="#peekCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+        </div>
+
+        <div class="carousel-inner">
+
+          <div class="carousel-item active">
+            <img src="png's/main.png" class="d-block w-100" alt="Sneak peek 1">
+          </div>
+
+          <div class="carousel-item">
+            <img src="png's/host.png" class="d-block w-100" alt="Sneak peek 2">
+          </div>
+
+          <div class="carousel-item">
+            <img src="png's/join.png" class="d-block w-100" alt="Sneak peek 3">
+          </div>
+
+          <div class="carousel-item">
+            <img src="png's/csnipps.png" class="d-block w-100" alt="Sneak peek 4">
+          </div>
+
+          <div class="carousel-item">
+            <img src="png's/lboard.png" class="d-block w-100" alt="Sneak peek 5">
+          </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#peekCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#peekCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="faq" class="py-5">
+      <h2 class="text-blue mb-1">faq()</h2>
+      <p class="text-muted2 mb-4">/* frequently asked questions */</p>
+
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+          <h3 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+              How many players do I need?
+            </button>
+          </h3>
+          <div id="q1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">Two players compete head-to-head. To host a match you need three devices in total: the host plus two players.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+              Do we need internet to play?
+            </button>
+          </h3>
+          <div id="q2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">No. FINDEUBUG runs over a local network, so every device just needs to be on the same Wi-Fi or LAN.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+              What programming languages are used?
+            </button>
+          </h3>
+          <div id="q3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">The built-in set includes 300 (C++) short programs with a single hidden bug each. Different difficulty levels cover common mistakes like off-by-one errors, wrong operators, and bad conditions.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+              How is the winner decided?
+            </button>
+          </h3>
+          <div id="q4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">Whoever finds and fixes the bug first earns the most points for the round. Faster and more accurate answers score higher, and totals appear on the leaderboard.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h3 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+              Can I add my own code snippets?
+            </button>
+          </h3>
+          <div id="q5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">Yes. Use the custom_snippets() menu to add your own buggy programs and play them in your next match.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="feedback" class="py-5">
+      <h2 class="text-blue mb-1">feedback()</h2>
+      <p class="text-muted2 mb-4">/* found a bug in our bug game? tell us. */</p>
+
+      <div id="formAlert" class="alert alert-danger d-none" role="alert">
+        Please fix the highlighted fields and try again.
+      </div>
+
+      <form id="feedbackForm" novalidate class="card card-fb p-4">
+        <div class="mb-3">
+          <label for="email" class="form-label">email</label>
+          <input type="email" class="form-control" id="email" placeholder="gly@sample.com" autocomplete="email">
+          <div class="invalid-feedback" id="emailError"></div>
+        </div>
+        <div class="mb-4">
+          <label for="message" class="form-label">feedback</label>
+          <textarea class="form-control" id="message" rows="5" maxlength="500" placeholder="// what did you like? what should we fix?"></textarea>
+          <div class="d-flex justify-content-between">
+            <div class="invalid-feedback" id="messageError"></div>
+            <small class="text-muted2 ms-auto mt-1"><span id="charCount">0</span>/500</small>
+          </div>
+        </div>
+        <div><button type="submit" class="btn btn-fb">SUBMIT_FEEDBACK()</button></div>
+      </form>
+    </section>
+
+    <footer class="d-flex flex-wrap justify-content-between gap-2 pt-3 pb-4 mt-4">
+      <span>same wi-fi / lan for all devices</span>
+      <span>/* made by gly */</span>
+      <span>programs :: 300</span>
+    </footer>
+  </div>
+</main>
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body p-4">
+        <div class="check-circle mb-3">✓</div>
+        <h3 class="h5 text-blue" id="successTitle">feedback_sent()</h3>
+        <p class="text-muted2 mb-4">Thanks! We got your feedback and will use it to improve FINDEUBUG.</p>
+        <button type="button" class="btn btn-fb" data-bs-dismiss="modal">CLOSE()</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const navMenu = document.getElementById('navMenu');
+  document.querySelectorAll('#sideNav .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (navMenu.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(navMenu).hide();
+    });
+  });
+
+  const form = document.getElementById('feedbackForm');
+  const email = document.getElementById('email');
+  const message = document.getElementById('message');
+  const emailError = document.getElementById('emailError');
+  const messageError = document.getElementById('messageError');
+  const formAlert = document.getElementById('formAlert');
+  const charCount = document.getElementById('charCount');
+  const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function setError(input, errorEl, msg) {
+    input.classList.add('is-invalid');
+    errorEl.textContent = msg;
+  }
+  function clearError(input) {
+    input.classList.remove('is-invalid');
+  }
+
+  function validateEmail() {
+    const v = email.value.trim();
+    if (!v) { setError(email, emailError, 'Email is required.'); return false; }
+    if (!EMAIL_RE.test(v)) { setError(email, emailError, 'Enter a valid email address (e.g. you@example.com).'); return false; }
+    clearError(email); return true;
+  }
+  function validateMessage() {
+    const v = message.value.trim();
+    if (!v) { setError(message, messageError, 'Feedback cannot be empty.'); return false; }
+    if (v.length < 10) { setError(message, messageError, 'Please write at least 10 characters.'); return false; }
+    clearError(message); return true;
+  }
+
+  email.addEventListener('input', () => { if (email.classList.contains('is-invalid')) validateEmail(); });
+  message.addEventListener('input', () => {
+    charCount.textContent = message.value.length;
+    if (message.classList.contains('is-invalid')) validateMessage();
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const okEmail = validateEmail();
+    const okMsg = validateMessage();
+
+    if (!okEmail || !okMsg) {
+      formAlert.classList.remove('d-none');
+      (okEmail ? message : email).focus();
+      return;
+    }
+
+    formAlert.classList.add('d-none');
+    successModal.show();
+    form.reset();
+    charCount.textContent = '0';
+  });
+</script>
+</body>
+</html>
